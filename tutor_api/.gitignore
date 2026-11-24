@@ -1,0 +1,9 @@
+# secrets and local-only files: never commit these
+.venv/
+__pycache__/
+.pytest_cache/
+*.pyc
+.env
+*.db
+*.db-shm
+*.db-wal
