@@ -1,0 +1,13 @@
+<div class="chat-wrap">
+
+  <div class="chat-body">
+    @if (showWelcome()) {
+      <app-parent-ai-chat-welcome />
+    } @else {
+      <app-ai-chat-messages />
+    }
+  </div>
+
+  <app-ai-chat-input />
+
+</div>

@@ -1,0 +1,208 @@
+<div class="page">
+
+  <!-- Header -->
+  <header class="head">
+    <div>
+      <h1>Grades</h1>
+      <p class="sub">Quiz results by subject. Select a bar to see every question {{ childName() ? childName() + ' answered' : 'answered' }}.</p>
+    </div>
+
+    @if (children().length > 1) {
+      <div class="chips" role="tablist" aria-label="Choose a child">
+        @for (c of children(); track c.id) {
+          <button type="button" role="tab" class="chip" [class.on]="c.id === childId()" [attr.aria-selected]="c.id === childId()" (click)="pickChild(c.id)">
+            {{ c.username }}
+          </button>
+        }
+      </div>
+    }
+  </header>
+
+  <!-- Range controls -->
+  <div class="controls">
+    <div class="seg" role="group" aria-label="Time range">
+      @for (r of ranges; track r.key) {
+        <button type="button" class="seg-btn" [class.on]="r.key === range()" [attr.aria-pressed]="r.key === range()" (click)="setRange(r.key)">
+          {{ r.label }}
+        </button>
+      }
+    </div>
+    <div class="zoom">
+      <button type="button" class="icon-btn" (click)="zoom(-1)" [disabled]="rangeIndex() === 0" aria-label="Zoom in to a shorter period" title="Zoom in">
+        <mat-icon>zoom_in</mat-icon>
+      </button>
+      <button type="button" class="icon-btn" (click)="zoom(1)" [disabled]="rangeIndex() === ranges.length - 1" aria-label="Zoom out to a longer period" title="Zoom out">
+        <mat-icon>zoom_out</mat-icon>
+      </button>
+    </div>
+    @if (report(); as r) {
+      <p class="range-text">
+        Showing {{ rangeInfo().long }} ({{ rangeText(r) }})
+        @if (r.quiz_count) { &nbsp;·&nbsp; {{ r.quiz_count }} {{ r.quiz_count === 1 ? 'quiz' : 'quizzes' }} &nbsp;·&nbsp; average {{ r.average_percent }}% }
+      </p>
+    }
+  </div>
+
+  @if (error(); as message) {
+    <div class="state error" role="alert">
+      <mat-icon>cloud_off</mat-icon>
+      <p>{{ message }}</p>
+      <button type="button" class="btn" (click)="load()">Try again</button>
+    </div>
+  } @else if (loading() && !report()) {
+    <div class="state" aria-live="polite"><mat-icon class="spin">autorenew</mat-icon><p>Loading grades…</p></div>
+  } @else if (report(); as r) {
+
+    <!-- Subjects: averages, also work as filters -->
+    @if (subjects().length) {
+      <div class="subjects" role="group" aria-label="Subjects (select to show or hide)">
+        @for (s of subjects(); track s.subject) {
+          <button type="button" class="subject" [class.off]="hidden().includes(s.subject)" [attr.aria-pressed]="!hidden().includes(s.subject)" (click)="toggleSubject(s.subject)">
+            <span class="dot" [style.background]="color(s.subject)"></span>
+            <span class="subject-name">{{ s.subject }}</span>
+            <span class="subject-avg" [class]="band(s.average_percent)">{{ s.average_percent }}%</span>
+            <span class="subject-meta">{{ s.quizzes }} {{ s.quizzes === 1 ? 'quiz' : 'quizzes' }}</span>
+          </button>
+        }
+      </div>
+    }
+
+    <!-- Bar chart: one bar per quiz -->
+    <section class="card chart-card" [class.dim]="loading()" aria-label="Quiz scores">
+      @if (!bars().length) {
+        <div class="state inline">
+          <mat-icon>quiz</mat-icon>
+          @if (r.quiz_count === 0) {
+            <p>No quizzes in {{ rangeInfo().long }}.</p>
+            @if (rangeIndex() < ranges.length - 1) { <button type="button" class="btn" (click)="zoom(1)">Zoom out</button> }
+          } @else {
+            <p>All subjects are hidden. Select one above to show it.</p>
+          }
+        </div>
+      } @else {
+        <div class="chart">
+          <div class="y-axis" aria-hidden="true">
+            @for (t of yTicks; track t) { <span [style.bottom.%]="t">{{ t }}%</span> }
+          </div>
+          <div class="scroll" #scroller tabindex="0" aria-label="Scrollable chart, newest quiz on the right">
+            <div class="track" [style.min-width]="trackWidth()">
+              <div class="grid" aria-hidden="true">
+                @for (t of yTicks; track t) { <i [style.bottom.%]="t" [class.pass]="t === 50"></i> }
+              </div>
+              <div class="bars">
+                @for (q of bars(); track q.id) {
+                  <button type="button" class="col" (click)="open(q)" [attr.aria-label]="barLabel(q)" [title]="q.title + ': ' + q.correct + ' of ' + q.total">
+                    <span class="well">
+                      <span class="value" [class]="band(q.score_percent)" [style.bottom]="'calc(' + q.score_percent + '% + 4px)'">{{ q.score_percent }}%</span>
+                      <span class="bar" [style.height.%]="q.score_percent" [style.background]="color(q.subject)"></span>
+                    </span>
+                    <span class="label">{{ q.title }}</span>
+                    <span class="when">{{ fmtDate(q.date, showYear()) }}</span>
+                  </button>
+                }
+              </div>
+            </div>
+          </div>
+        </div>
+        <p class="legend-note"><i class="pass-line"></i> 50% line &nbsp;·&nbsp; Scroll sideways to see older quizzes</p>
+      }
+    </section>
+
+    <!-- Weak spots -->
+    <section class="card weak-card" aria-label="Weak spots">
+      <div class="weak-head">
+        <mat-icon>psychology_alt</mat-icon>
+        <div>
+          <h2>Where {{ childName() || 'the student' }} is struggling</h2>
+          <p>Worked out from every question answered in {{ rangeInfo().long }}. A topic needs at least 4 questions to be judged.</p>
+        </div>
+      </div>
+
+      @if (!weak()?.has_enough_data) {
+        <div class="state inline small">
+          <p>Not enough questions in this period to find patterns yet.</p>
+          @if (rangeIndex() < ranges.length - 1) { <button type="button" class="btn" (click)="zoom(1)">Zoom out</button> }
+        </div>
+      } @else if (!weakTopics().length) {
+        <p class="good-news"><mat-icon>check_circle</mat-icon> No weak topics in this period. Nothing is under 60%.</p>
+      } @else {
+        <ul class="weak-list">
+          @for (t of weakTopics(); track trackTopic($index, t)) {
+            <li class="weak-item">
+              <div class="weak-row">
+                <span class="dot" [style.background]="color(t.subject)"></span>
+                <strong>{{ t.topic_name }}</strong>
+                <span class="tag">{{ t.subject }}</span>
+                <span class="weak-score low">{{ t.accuracy_percent }}%</span>
+              </div>
+              <div class="meter" aria-hidden="true"><i [style.width.%]="t.accuracy_percent"></i></div>
+              <p class="weak-meta">{{ t.correct }} of {{ t.questions }} questions right across {{ t.quizzes }} {{ t.quizzes === 1 ? 'quiz' : 'quizzes' }}</p>
+              @if (t.recent_mistakes.length) {
+                <details>
+                  <summary>Recent questions they got wrong</summary>
+                  <ul class="mistakes">
+                    @for (m of t.recent_mistakes; track m.quiz_id + m.question) {
+                      <li>
+                        <p class="q">{{ m.question }}</p>
+                        <p class="a"><span class="wrong">{{ m.student_answer ?? 'Skipped' }}</span> <span class="right">Correct: {{ m.correct_answer }}</span></p>
+                        <p class="from">{{ m.quiz_title }} · {{ fmtDate(m.date, true) }}</p>
+                      </li>
+                    }
+                  </ul>
+                </details>
+              }
+            </li>
+          }
+        </ul>
+      }
+
+      @if (strongTopics().length) {
+        <p class="strong-line"><mat-icon>thumb_up</mat-icon> Strong in:
+          @for (t of strongTopics(); track trackTopic($index, t); let last = $last) { {{ t.topic_name }} ({{ t.accuracy_percent }}%){{ last ? '' : ',' }} }
+        </p>
+      }
+    </section>
+  }
+
+  <!-- Quiz detail -->
+  @if (selected(); as quiz) {
+    <div class="overlay" (click)="close()"></div>
+    <div class="dialog" role="dialog" aria-modal="true" [attr.aria-label]="quiz.title">
+      <header class="dialog-head">
+        <div>
+          <span class="tag" [style.background]="color(quiz.subject)">{{ quiz.subject }}</span>
+          <h2>{{ quiz.title }}</h2>
+          <p>{{ fmtDate(quiz.date, true) }} @if (minutes(quiz.duration_seconds); as m) { &nbsp;·&nbsp; {{ m }} }</p>
+        </div>
+        <div class="score">
+          <strong [class]="band(quiz.score_percent)">{{ quiz.score_percent }}%</strong>
+          <span>Grade {{ quiz.grade }} · {{ quiz.correct }} of {{ quiz.total }}</span>
+        </div>
+        <button type="button" class="icon-btn" (click)="close()" aria-label="Close"><mat-icon>close</mat-icon></button>
+      </header>
+
+      @if (detailError(); as message) {
+        <p class="state small error">{{ message }}</p>
+      } @else if (detailLoading()) {
+        <p class="state small">Loading questions…</p>
+      } @else {
+        <ol class="questions">
+          @for (q of quiz.questions; track q.number) {
+            <li [class.ok]="q.is_correct" [class.bad]="!q.is_correct">
+              <mat-icon class="mark" [attr.aria-label]="q.is_correct ? 'Correct' : 'Wrong'">{{ q.is_correct ? 'check_circle' : 'cancel' }}</mat-icon>
+              <div>
+                <p class="q">{{ q.question }}</p>
+                @if (q.is_correct) {
+                  <p class="a"><span class="right">{{ q.student_answer }}</span></p>
+                } @else {
+                  <p class="a"><span class="wrong">{{ q.student_answer ?? 'Skipped' }}</span> <span class="right">Correct: {{ q.correct_answer }}</span></p>
+                }
+                <p class="from">{{ q.topic_name }}</p>
+              </div>
+            </li>
+          }
+        </ol>
+      }
+    </div>
+  }
+</div>

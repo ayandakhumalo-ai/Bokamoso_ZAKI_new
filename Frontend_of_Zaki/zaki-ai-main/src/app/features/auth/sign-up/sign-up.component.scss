@@ -1,0 +1,255 @@
+@keyframes robotEntrance {
+  from { opacity: 0; transform: translateY(24px) scale(0.88); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50%       { transform: translateY(-9px); }
+}
+@keyframes fadeSlideUp {
+  from { opacity: 0; transform: translateY(16px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes fadeSlideRight {
+  from { opacity: 0; transform: translateX(20px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+
+:host { display: block; }
+
+// ── Page layout ───────────────────────────────────────────────────────────────
+.auth-page {
+  display: flex;
+  min-height: 100vh;
+}
+
+// ── Left brand panel ──────────────────────────────────────────────────────────
+.panel-left {
+  flex: 1;
+  background: #0A2540;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 48px;
+
+  @media (max-width: 860px) { display: none; }
+}
+
+.panel-inner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+// Robot
+.robot-wrap {
+  position: relative;
+  margin-bottom: 32px;
+  animation: robotEntrance 0.7s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.robot {
+  width: 140px;
+  height: 160px;
+  filter: drop-shadow(0 12px 24px rgba(0,0,0,.4));
+  animation: float 4s ease-in-out 0.7s infinite;
+}
+
+.robot-shadow {
+  position: absolute;
+  bottom: -8px; left: 50%;
+  transform: translateX(-50%);
+  width: 84px; height: 16px;
+  background: radial-gradient(ellipse, rgba(0,0,0,.3) 0%, transparent 70%);
+  border-radius: 50%;
+}
+
+// Brand
+.panel-brand {
+  font-size: 52px;
+  font-weight: 900;
+  color: #fff;
+  letter-spacing: 0.08em;
+  margin: 0 0 8px;
+  line-height: 1;
+  animation: fadeSlideUp 0.5s cubic-bezier(0.16, 1, 0.3, 1) 0.2s both;
+}
+
+.brand-ai {
+  color: #7C3AED;
+}
+
+.panel-tagline {
+  font-size: 15px;
+  color: rgba(255,255,255,.5);
+  margin: 0 0 36px;
+  line-height: 1.55;
+  animation: fadeSlideUp 0.5s cubic-bezier(0.16, 1, 0.3, 1) 0.3s both;
+}
+
+// Features
+.panel-features {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  text-align: left;
+  animation: fadeSlideUp 0.5s cubic-bezier(0.16, 1, 0.3, 1) 0.4s both;
+}
+
+.panel-feature {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 14px;
+  color: rgba(255,255,255,.65);
+  font-weight: 500;
+}
+
+.feature-icon {
+  width: 20px;
+  height: 20px;
+  min-width: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: rgba(255,255,255,.4);
+}
+
+// ── Right form panel ──────────────────────────────────────────────────────────
+.panel-right {
+  flex: 1;
+  background: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 48px 32px;
+}
+
+.form-wrap {
+  width: 100%;
+  max-width: 400px;
+  animation: fadeSlideRight 0.5s cubic-bezier(0.16, 1, 0.3, 1) 0.1s both;
+}
+
+.mobile-logo {
+  display: none;
+  font-size: 22px;
+  font-weight: 900;
+  color: #0A2540;
+  letter-spacing: 0.06em;
+  margin-bottom: 28px;
+  text-align: center;
+
+  span { color: #7C3AED; }
+
+  @media (max-width: 860px) { display: block; }
+}
+
+// Form heading
+.form-head {
+  margin-bottom: 28px;
+
+  h2 {
+    font-size: 26px;
+    font-weight: 800;
+    color: #0A2540;
+    letter-spacing: -.03em;
+    margin: 0 0 6px;
+    line-height: 1.2;
+  }
+
+  p {
+    font-size: 14.5px;
+    color: #697386;
+    margin: 0;
+  }
+}
+
+// ── Error ─────────────────────────────────────────────────────────────────────
+.error-msg {
+  color: #DC2626; font-size: 13px; margin: 0 0 14px; line-height: 1.4;
+  background: #FEF2F2; border: 1px solid rgba(220,38,38,.15);
+  border-radius: 8px; padding: 10px 14px;
+}
+
+// ── Form fields ───────────────────────────────────────────────────────────────
+.auth-form {
+  display: flex; flex-direction: column; gap: 16px; margin-bottom: 20px;
+}
+
+.field {
+  display: flex; flex-direction: column; gap: 6px;
+
+  label {
+    font-size: 13px; font-weight: 600; color: #0A2540; letter-spacing: .005em;
+  }
+
+  input {
+    height: 46px;
+    padding: 0 14px;
+    border: 1.5px solid #DDE3EA;
+    border-radius: 10px;
+    font-family: inherit; font-size: 14.5px; color: #0A2540;
+    background: #fff; outline: none; width: 100%; box-sizing: border-box;
+    transition: border-color .14s;
+
+    &::placeholder { color: #9CAAB6; }
+    &:focus { border-color: #7C3AED; }
+  }
+}
+
+.input-wrap {
+  position: relative;
+  input { padding-right: 44px; }
+}
+
+.eye-btn {
+  position: absolute; right: 12px; top: 50%; transform: translateY(-50%);
+  background: none; border: none; cursor: pointer; padding: 4px; color: #697386;
+  display: flex; align-items: center; border-radius: 4px;
+  transition: color .14s;
+  &:hover { color: #0A2540; }
+  &:focus-visible { outline: 2px solid #7C3AED; outline-offset: 1px; }
+}
+
+.text-link {
+  font-size: 13px; font-weight: 600; color: #7C3AED; text-decoration: none;
+  &:hover { text-decoration: underline; }
+}
+
+// ── Submit ────────────────────────────────────────────────────────────────────
+.submit-btn {
+  display: flex; align-items: center; justify-content: center;
+  width: 100%; height: 46px;
+  background: #7C3AED; border: none; border-radius: 10px;
+  color: #fff; font-family: inherit; font-size: 15px; font-weight: 700;
+  letter-spacing: -.01em; cursor: pointer; margin-top: 2px;
+  transition: background .14s, transform .12s;
+
+  &:hover:not(:disabled) { background: #6D28D9; }
+  &:active:not(:disabled) { transform: scale(0.99); }
+  &:disabled { opacity: .55; cursor: default; }
+  &:focus-visible { outline: 2px solid #7C3AED; outline-offset: 3px; }
+}
+
+.spinner {
+  width: 17px; height: 17px;
+  border: 2px solid rgba(255,255,255,.35);
+  border-top-color: #fff; border-radius: 50%;
+  animation: spin .65s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+// ── Terms text ────────────────────────────────────────────────────────────────
+.terms-text {
+  text-align: center; font-size: 12.5px; color: #9CAAB6; margin: 0 0 16px; line-height: 1.5;
+}
+
+// ── Switch prompt ─────────────────────────────────────────────────────────────
+.switch-text {
+  text-align: center; font-size: 13.5px; color: #697386; margin: 0;
+}

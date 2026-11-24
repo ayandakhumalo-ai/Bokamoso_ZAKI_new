@@ -1,0 +1,31 @@
+<header class="chat-header">
+  <div class="col left">
+    <button
+      mat-icon-button
+      class="icon-btn"
+      (click)="toggleSidebar.emit()"
+      [attr.aria-label]="sidebarOpen() ? 'Close sidebar' : 'Open sidebar'"
+      [attr.aria-expanded]="sidebarOpen()"
+      type="button"
+    >
+      <mat-icon>{{ sidebarOpen() ? 'menu_open' : 'menu' }}</mat-icon>
+    </button>
+  </div>
+
+  <div class="col center">
+    <button class="model-selector" type="button">
+      <mat-icon class="model-icon">auto_awesome</mat-icon>
+      <span class="model-name">Zaki</span>
+      <mat-icon class="caret">expand_more</mat-icon>
+    </button>
+  </div>
+
+  <div class="col right">
+    <button class="sign-up-btn" type="button" aria-label="Sign up" routerLink="/auth/sign-up">
+      Sign up
+    </button>
+    <button class="sign-in-btn" type="button" aria-label="Sign in" routerLink="/auth/sign-in">
+      Sign in
+    </button>
+  </div>
+</header>
